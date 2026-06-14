@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://YOUR-BACKEND-NAME.onrender.com/api/:path*"
+      "destination": "https://backend-pavithra-projects.vercel.app/api/:path*"
     }
   ]
 }
