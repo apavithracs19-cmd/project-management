@@ -14,8 +14,8 @@ const jwt      = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 
 const app = express();
-const PORT = 5000;
-const JWT_SECRET = 'projectflow_secret_key_change_in_production';
+const PORT = process.env.PORT || 5000;
+const JWT_SECRET = process.env.JWT_SECRET || 'projectflow_secret_key_change_in_production';
 
 app.use(cors());
 app.use(express.json());
