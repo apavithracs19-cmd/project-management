@@ -74,13 +74,17 @@ input, select { font-family: inherit; }
 .topbar-logo {
   display: flex;
   align-items: center;
-  min-width: 160px;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+  height: 42px;
 }
 .topbar-logo img {
-  height: 38px;
+  height: 28px;
   width: auto;
   object-fit: contain;
-  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.1));
 }
 .topbar-title {
   position: absolute;
@@ -462,7 +466,16 @@ input, select { font-family: inherit; }
   gap: 16px;
   margin-bottom: 8px;
 }
-.login-logo-wrap img { height: 50px; width: auto; filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.15)); }
+.login-logo-wrap img {
+  height: 52px;
+  width: auto;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+  object-fit: contain;
+}
 .login-logo-text { display: flex; flex-direction: column; line-height: 1.15; }
 .login-logo-name { font-size: 21px; font-weight: 800; color: var(--red); letter-spacing: -0.3px; }
 .login-logo-name span { color: #ffffff; text-shadow: 0 0 10px rgba(255, 255, 255, 0.25); }
