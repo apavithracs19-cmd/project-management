@@ -31,10 +31,6 @@ export default function Login() {
       <div className="login-box">
         <div className="login-logo-wrap">
           <img src="/logo.png" alt="A2Z Technologies" />
-          <div className="login-logo-text">
-            <div className="login-logo-name"><span>a2z</span> technologies</div>
-            <div className="login-logo-tag">design • develop</div>
-          </div>
         </div>
         <div className="login-sub">Sign in to your workspace</div>
 
