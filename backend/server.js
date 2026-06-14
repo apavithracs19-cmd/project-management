@@ -20,6 +20,11 @@ const JWT_SECRET = process.env.JWT_SECRET || 'projectflow_secret_key_change_in_p
 app.use(cors());
 app.use(express.json());
 
+// Root route
+app.get('/', (req, res) => {
+  res.json({ message: "ProjectFlow API is running. Use /api/health to check health." });
+});
+
 // ═══════════════════════════════════════════════
 //  IN-MEMORY DATABASE
 // ═══════════════════════════════════════════════
