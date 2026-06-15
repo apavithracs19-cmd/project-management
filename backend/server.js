@@ -39,13 +39,13 @@ const DB = {
 async function seedUsers() {
   const hash = (pw) => bcrypt.hashSync(pw, 10);
   DB.users = [
-    { id: uuidv4(), name: 'Rajan',   email: 'admin@pf.com',   password: hash('admin123'),  role: 'admin',     avatar: 'RA', createdAt: Date.now() },
-    { id: uuidv4(), name: 'Priya',   email: 'priya@pf.com',   password: hash('qc123'),     role: 'qc',        avatar: 'PR', createdAt: Date.now() },
-    { id: uuidv4(), name: 'Suresh',  email: 'suresh@pf.com',  password: hash('qc123'),     role: 'qc',        avatar: 'SU', createdAt: Date.now() },
-    { id: uuidv4(), name: 'Arun',    email: 'arun@pf.com',    password: hash('dev123'),    role: 'developer', avatar: 'AR', createdAt: Date.now() },
-    { id: uuidv4(), name: 'Deepa',   email: 'deepa@pf.com',   password: hash('dev123'),    role: 'developer', avatar: 'DE', createdAt: Date.now() },
-    { id: uuidv4(), name: 'Karthik', email: 'karthik@pf.com', password: hash('dev123'),    role: 'developer', avatar: 'KA', createdAt: Date.now() },
-    { id: uuidv4(), name: 'Meena',   email: 'meena@pf.com',   password: hash('dev123'),    role: 'developer', avatar: 'ME', createdAt: Date.now() },
+    { id: uuidv4(), name: 'Rajan',   email: 'admin@pf.com',   password: hash('admin123'),  role: 'admin',     avatar: 'RA', phone: '9876543210', createdAt: Date.now() },
+    { id: uuidv4(), name: 'Priya',   email: 'priya@pf.com',   password: hash('qc123'),     role: 'qc',        avatar: 'PR', phone: '9876543211', createdAt: Date.now() },
+    { id: uuidv4(), name: 'Suresh',  email: 'suresh@pf.com',  password: hash('qc123'),     role: 'qc',        avatar: 'SU', phone: '9876543212', createdAt: Date.now() },
+    { id: uuidv4(), name: 'Arun',    email: 'arun@pf.com',    password: hash('dev123'),    role: 'developer', avatar: 'AR', phone: '9876543213', createdAt: Date.now() },
+    { id: uuidv4(), name: 'Deepa',   email: 'deepa@pf.com',   password: hash('dev123'),    role: 'developer', avatar: 'DE', phone: '9876543214', createdAt: Date.now() },
+    { id: uuidv4(), name: 'Karthik', email: 'karthik@pf.com', password: hash('dev123'),    role: 'developer', avatar: 'KA', phone: '9876543215', createdAt: Date.now() },
+    { id: uuidv4(), name: 'Meena',   email: 'meena@pf.com',   password: hash('dev123'),    role: 'developer', avatar: 'ME', phone: '9876543216', createdAt: Date.now() },
   ];
   console.log('✅ Default users seeded');
 }
@@ -170,7 +170,7 @@ app.get('/api/users/:id/stats', auth, (req, res) => {
 
 // POST /api/users — admin can create new users
 app.post('/api/users', auth, requireRole('admin'), (req, res) => {
-  const { name, email, password, role } = req.body;
+  const { name, email, password, role, phone } = req.body;
   if (!name || !email || !password || !role)
     return res.status(400).json({ error: 'All fields required' });
   if (!['admin','qc','developer'].includes(role))
@@ -182,14 +182,78 @@ app.post('/api/users', auth, requireRole('admin'), (req, res) => {
   const user = {
     id:        uuidv4(),
     name,
-    email:     email.toLowerCase(),
+    email:     email.toLowerCase().trim(),
     password:  bcrypt.hashSync(password, 10),
     role,
+    phone:     phone ? phone.trim() : '',
     avatar:    initials,
     createdAt: Date.now(),
   };
   DB.users.push(user);
   res.status(201).json(safeUser(user));
+});
+
+// PUT /api/users/:id — admin can update user details
+app.put('/api/users/:id', auth, requireRole('admin'), (req, res) => {
+  const { id } = req.params;
+  const { name, email, password, role, phone } = req.body;
+
+  const user = DB.users.find(u => u.id === id);
+  if (!user) return res.status(404).json({ error: 'User not found' });
+
+  if (email && email.toLowerCase().trim() !== user.email.toLowerCase()) {
+    if (DB.users.find(u => u.email === email.toLowerCase().trim())) {
+      return res.status(409).json({ error: 'Email already exists' });
+    }
+    user.email = email.toLowerCase().trim();
+  }
+
+  if (name) {
+    user.name = name.trim();
+    user.avatar = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+  }
+
+  if (password) {
+    user.password = bcrypt.hashSync(password, 10);
+  }
+
+  if (role) {
+    if (!['admin', 'qc', 'developer'].includes(role)) {
+      return res.status(400).json({ error: 'Invalid role' });
+    }
+    user.role = role;
+  }
+
+  if (phone !== undefined) {
+    user.phone = phone.trim();
+  }
+
+  res.json(safeUser(user));
+});
+
+// PATCH /api/users/:id/profile — any authenticated user can update their OWN profile
+app.patch('/api/users/:id/profile', auth, (req, res) => {
+  const { id } = req.params;
+  if (req.user.id !== id)
+    return res.status(403).json({ error: 'You can only update your own profile' });
+
+  const { name, email, password, phone } = req.body;
+  const user = DB.users.find(u => u.id === id);
+  if (!user) return res.status(404).json({ error: 'User not found' });
+
+  if (email && email.toLowerCase().trim() !== user.email.toLowerCase()) {
+    if (DB.users.find(u => u.email === email.toLowerCase().trim()))
+      return res.status(409).json({ error: 'Email already exists' });
+    user.email = email.toLowerCase().trim();
+  }
+  if (name) {
+    user.name   = name.trim();
+    user.avatar = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+  }
+  if (password) user.password = bcrypt.hashSync(password, 10);
+  if (phone !== undefined) user.phone = phone.trim();
+
+  res.json(safeUser(user));
 });
 
 // ═══════════════════════════════════════════════
@@ -318,6 +382,94 @@ app.post('/api/nowork/end', auth, requireRole('developer'), (req, res) => {
   session.endTime  = Date.now();
   session.duration = session.endTime - session.startTime;
   res.json(session);
+});
+
+// ═══════════════════════════════════════════════
+//  REPORTS  (admin + qc)
+// ═══════════════════════════════════════════════
+
+function buildReport(startMs, endMs) {
+  // Projects that ended within the window
+  const doneProjects = DB.projects.filter(
+    p => p.status === 'done' && p.endTime >= startMs && p.endTime <= endMs
+  );
+  // Projects that started within the window but not yet done
+  const activeProjects = DB.projects.filter(
+    p => p.status === 'in_progress' && p.startTime >= startMs && p.startTime <= endMs
+  );
+  // Projects created in window still pending
+  const pendingProjects = DB.projects.filter(
+    p => p.status === 'pending' && p.createdAt >= startMs && p.createdAt <= endMs
+  );
+
+  const developers = DB.users.filter(u => u.role === 'developer');
+
+  const devActivity = developers.map(d => {
+    // Work time = sum of done project durations that finished in window
+    const devDone = doneProjects.filter(p => p.assignedTo === d.id);
+    const workMs  = devDone.reduce((a, p) => a + (p.duration || 0), 0);
+
+    // No-work time = no-work sessions that ended in window
+    const nwSessions = DB.noworkSessions.filter(
+      n => n.devId === d.id && n.endTime && n.endTime >= startMs && n.endTime <= endMs
+    );
+    const noWorkMs = nwSessions.reduce((a, n) => a + (n.duration || 0), 0);
+
+    // All timestamps in window for this dev to estimate session span
+    const allTimes = [
+      ...devDone.map(p => p.startTime).filter(Boolean),
+      ...devDone.map(p => p.endTime).filter(Boolean),
+      ...nwSessions.map(n => n.startTime).filter(Boolean),
+      ...nwSessions.map(n => n.endTime).filter(Boolean),
+    ];
+    const sessionStart = allTimes.length ? Math.min(...allTimes) : null;
+    const sessionEnd   = allTimes.length ? Math.max(...allTimes) : null;
+    const spanMs       = sessionStart && sessionEnd ? sessionEnd - sessionStart : 0;
+    const breakMs      = Math.max(0, spanMs - workMs - noWorkMs);
+
+    return {
+      user:           safeUser(d),
+      workMs,
+      noWorkMs,
+      breakMs,
+      doneCount:      devDone.length,
+      pendingCount:   DB.projects.filter(p => p.assignedTo === d.id && p.status === 'pending').length,
+      activeCount:    DB.projects.filter(p => p.assignedTo === d.id && p.status === 'in_progress').length,
+      doneProjects:   devDone.map(p => ({
+        ...p,
+        assignedToName: d.name,
+        assignedByName: DB.users.find(u => u.id === p.assignedBy)?.name,
+      })),
+    };
+  });
+
+  return {
+    totalDone:    doneProjects.length,
+    totalPending: pendingProjects.length + activeProjects.length,
+    totalActive:  activeProjects.length,
+    doneProjects: doneProjects.map(p => ({
+      ...p,
+      assignedToName: DB.users.find(u => u.id === p.assignedTo)?.name,
+      assignedByName: DB.users.find(u => u.id === p.assignedBy)?.name,
+    })),
+    devActivity,
+  };
+}
+
+// GET /api/reports/daily — today's report
+app.get('/api/reports/daily', auth, requireRole('admin', 'qc'), (req, res) => {
+  const now   = new Date();
+  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const end   = start + 86400000 - 1;
+  res.json(buildReport(start, end));
+});
+
+// GET /api/reports/monthly — current month report
+app.get('/api/reports/monthly', auth, requireRole('admin', 'qc'), (req, res) => {
+  const now   = new Date();
+  const start = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+  const end   = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999).getTime();
+  res.json(buildReport(start, end));
 });
 
 // ═══════════════════════════════════════════════

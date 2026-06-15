@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../api/client';
 import { Avatar, StatusBadge, TypeTag, formatMs, Spinner, Empty, LiveTimer } from '../components/UI';
+import { ReportView } from './AdminDashboard';
 
 export default function QCDashboard() {
   const [tab, setTab]       = useState('assign');
@@ -59,11 +60,18 @@ export default function QCDashboard() {
 
   if (loading) return <div className="page-wrap"><Spinner /></div>;
 
+  const TABS = [
+    ['assign', 'Assign Work'],
+    ['assigned', 'My Assignments'],
+    ['devs', 'Developer Overview'],
+    ['reports', '📊 Reports'],
+  ];
+
   return (
     <div className="page-wrap">
       <div className="tabs">
-        {[['assign','Assign Work'],['assigned','My Assignments'],['devs','Developer Overview']].map(([k,l]) => (
-          <div key={k} className={`tab ${tab===k?'active':''}`} onClick={() => setTab(k)}>{l}</div>
+        {TABS.map(([k, l]) => (
+          <div key={k} className={`tab ${tab === k ? 'active' : ''}`} onClick={() => setTab(k)}>{l}</div>
         ))}
       </div>
 
@@ -71,40 +79,40 @@ export default function QCDashboard() {
       {tab === 'assign' && (
         <>
           <p className="section-title">Assign a project</p>
-          <div className="card" style={{marginBottom:28}}>
-            {formErr && <div className="login-error" style={{marginBottom:14}}>{formErr}</div>}
+          <div className="card" style={{ marginBottom: 28 }}>
+            {formErr && <div className="login-error" style={{ marginBottom: 14 }}>{formErr}</div>}
             <form onSubmit={handleAssign}>
-              <div className="form-row" style={{marginBottom:14}}>
-                <div className="form-group" style={{flex:2}}>
+              <div className="form-row" style={{ marginBottom: 14 }}>
+                <div className="form-group" style={{ flex: 2 }}>
                   <label>Project title</label>
                   <input
                     className="form-control"
                     value={form.title}
-                    onChange={e => setForm(p => ({...p, title: e.target.value}))}
+                    onChange={e => setForm(p => ({ ...p, title: e.target.value }))}
                     placeholder="e.g. Dashboard redesign, Bug fix #42…"
                     required
                   />
                 </div>
-                <div className="form-group" style={{maxWidth: 160}}>
+                <div className="form-group" style={{ maxWidth: 160 }}>
                   <label>Project type</label>
-                  <select className="form-control" value={form.type} onChange={e => setForm(p => ({...p, type: e.target.value}))}>
+                  <select className="form-control" value={form.type} onChange={e => setForm(p => ({ ...p, type: e.target.value }))}>
                     <option value="new">New project</option>
                     <option value="change">Changes</option>
                     <option value="other">Other</option>
                   </select>
                 </div>
               </div>
-              <div className="form-row" style={{alignItems:'flex-end'}}>
+              <div className="form-row" style={{ alignItems: 'flex-end' }}>
                 <div className="form-group">
                   <label>Assign to developer</label>
-                  <select className="form-control" value={form.assignedTo} onChange={e => setForm(p => ({...p, assignedTo: e.target.value}))}>
+                  <select className="form-control" value={form.assignedTo} onChange={e => setForm(p => ({ ...p, assignedTo: e.target.value }))}>
                     {devs.map(d => {
                       const st = devStats[d.id]?.status || 'idle';
                       return <option key={d.id} value={d.id}>{d.name} — {st === 'working' ? '🟢 Working' : st === 'nowork' ? '⚫ No-work' : '🟡 Idle'}</option>;
                     })}
                   </select>
                 </div>
-                <button className="btn btn-accent" type="submit" disabled={assigning} style={{height:39}}>
+                <button className="btn btn-accent" type="submit" disabled={assigning} style={{ height: 39 }}>
                   {assigning ? 'Assigning…' : 'Assign →'}
                 </button>
               </div>
@@ -124,10 +132,10 @@ export default function QCDashboard() {
                   <div className="data-row" key={p.id}>
                     <Avatar name={p.assignedToName || '?'} role="developer" size={24} />
                     <TypeTag type={p.type} />
-                    <span style={{flex:1}}>{p.title}</span>
-                    <span style={{color:'var(--text-2)',fontSize:12}}>{p.assignedToName}</span>
+                    <span style={{ flex: 1 }}>{p.title}</span>
+                    <span style={{ color: 'var(--text-2)', fontSize: 12 }}>{p.assignedToName}</span>
                     <StatusBadge status={p.status} />
-                    {p.duration && <span style={{fontSize:11,color:'var(--text-3)'}}>{formatMs(p.duration)}</span>}
+                    {p.duration && <span style={{ fontSize: 11, color: 'var(--text-3)' }}>{formatMs(p.duration)}</span>}
                   </div>
                 ))}
           </div>
@@ -147,22 +155,22 @@ export default function QCDashboard() {
                 <div className="dev-card" key={d.id}>
                   <div className="dev-header">
                     <Avatar name={d.name} role="developer" />
-                    <div style={{flex:1}}>
+                    <div style={{ flex: 1 }}>
                       <div className="dev-name">{d.name}</div>
                       <div className="dev-role">{pending.length} pending task{pending.length !== 1 ? 's' : ''}</div>
                     </div>
                     <StatusBadge status={stats.status || 'idle'} />
                   </div>
                   {active
-                    ? <div style={{display:'flex',alignItems:'center',gap:8,fontSize:12}}>
+                    ? <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}>
                         <TypeTag type={active.type} />
-                        <span style={{flex:1}}>{active.title}</span>
+                        <span style={{ flex: 1 }}>{active.title}</span>
                         <LiveTimer startTime={active.startTime} className="badge b-progress" />
                       </div>
-                    : <div style={{fontSize:12,color:'var(--text-3)'}}>No active task</div>}
+                    : <div style={{ fontSize: 12, color: 'var(--text-3)' }}>No active task</div>}
                   <div className="dev-stats">
-                    <span>⏱ Work: <b>{formatMs(stats.totalWorkMs||0)}</b></span>
-                    <span>☕ No-work: <b>{formatMs(stats.totalNoWorkMs||0)}</b></span>
+                    <span>⏱ Work: <b>{formatMs(stats.totalWorkMs || 0)}</b></span>
+                    <span>☕ No-work: <b>{formatMs(stats.totalNoWorkMs || 0)}</b></span>
                   </div>
                 </div>
               );
@@ -170,6 +178,9 @@ export default function QCDashboard() {
           </div>
         </>
       )}
+
+      {/* ── REPORTS ── */}
+      {tab === 'reports' && <ReportView />}
     </div>
   );
 }

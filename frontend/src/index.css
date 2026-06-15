@@ -516,3 +516,79 @@ input, select { font-family: inherit; }
 
 /* ── Divider ── */
 .divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+/* ── Report period toggle ── */
+.report-period-toggle {
+  display: inline-flex;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-md);
+  border-radius: 10px;
+  padding: 4px;
+  gap: 4px;
+}
+.rpt-pill {
+  padding: 6px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: all var(--transition-speed) ease;
+}
+.rpt-pill:hover { color: var(--text-1); background: rgba(255,255,255,0.04); }
+.rpt-pill.active {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* ── Report table ── */
+.rpt-table-wrap { overflow-x: auto; }
+.rpt-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.rpt-table thead tr {
+  background: rgba(255,255,255,0.04);
+  border-bottom: 1px solid var(--border);
+}
+.rpt-table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-2);
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  white-space: nowrap;
+}
+.rpt-table td {
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+.rpt-table tbody tr:last-child td { border-bottom: none; }
+.rpt-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+
+/* ── Report time labels ── */
+.rpt-time {
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  padding: 3px 8px;
+  border-radius: 5px;
+}
+.rpt-work   { color: #8ee339; background: rgba(142,227,57,0.1); }
+.rpt-nowork { color: #a5abb6; background: rgba(255,255,255,0.06); }
+.rpt-break  { color: #ffca4b; background: rgba(240,165,0,0.1); }
+
+/* ── Profile info block ── */
+.profile-avatar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
